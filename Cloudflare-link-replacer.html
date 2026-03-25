@@ -1,102 +1,59 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
   <meta charset="UTF-8">
-  <title>Cloudflare Link Replacer</title>
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      background: #0f172a;
-      color: #fff;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      height: 100vh;
-    }
-
-    .container {
-      background: #1e293b;
-      padding: 25px;
-      border-radius: 12px;
-      width: 600px;
-      box-shadow: 0 0 20px rgba(0,0,0,0.5);
-    }
-
-    h2 {
-      text-align: center;
-      margin-bottom: 20px;
-    }
-
-    input {
-      width: 100%;
-      padding: 10px;
-      border-radius: 8px;
-      border: none;
-      margin-bottom: 15px;
-      font-size: 14px;
-    }
-
-    button {
-      width: 100%;
-      padding: 10px;
-      border: none;
-      border-radius: 8px;
-      background: #22c55e;
-      color: #000;
-      font-weight: bold;
-      cursor: pointer;
-    }
-
-    textarea {
-      width: 100%;
-      height: 150px;
-      margin-top: 15px;
-      padding: 10px;
-      border-radius: 8px;
-      border: none;
-      font-size: 12px;
-    }
-
-    .copy-btn {
-      margin-top: 10px;
-      background: #38bdf8;
-    }
-  </style>
+  <title>Cloudflare Link Tool</title>
 </head>
-<body>
 
-<div class="container">
-  <h2>Cloudflare Link Replacer</h2>
+<body style="font-family: Arial; padding:20px; background:#111; color:white;">
 
-  <input id="linkInput" placeholder="Paste new Cloudflare link here..." />
+<h2>Cloudflare Link Replacer</h2>
 
-  <button onclick="generateCommand()">Generate Command</button>
+<input id="linkInput" placeholder="Paste link here"
+style="width:100%; padding:10px; margin-bottom:10px;" />
 
-  <textarea id="output" placeholder="Your command will appear here..."></textarea>
+<button id="generateBtn">Generate Command</button>
 
-  <button class="copy-btn" onclick="copyText()">Copy to Clipboard</button>
-</div>
+<br><br>
+
+<textarea id="output" style="width:100%; height:120px;"></textarea>
+
+<br><br>
+
+<button id="copyBtn">Copy</button>
 
 <script>
-  function generateCommand() {
-    const link = document.getElementById("linkInput").value.trim();
+  document.getElementById("generateBtn").addEventListener("click", function () {
+
+    let link = document.getElementById("linkInput").value;
 
     if (!link) {
-      alert("Please enter a link!");
+      alert("Enter link first");
       return;
     }
 
-    const command = docker stop n8n && docker rm n8n && docker run -d --name n8n -p 5678:5678 -e N8N_HOST=${link} -e N8N_PROTOCOL=https -e WEBHOOK_URL=https://${link} -e N8N_EDITOR_BASE_URL=https://${link} -e GENERIC_TIMEZONE=Asia/Kolkata -v n8n_data:/home/node/.n8n --restart unless-stopped docker.n8n.io/n8nio/n8n;
+    // Clean link
+    link = link.replace("https://", "").replace("http://", "").trim();
+
+    let command = "docker stop n8n && docker rm n8n && docker run -d --name n8n -p 5678:5678 -e N8N_HOST=" + link +
+    " -e N8N_PROTOCOL=https -e WEBHOOK_URL=https://" + link +
+    " -e N8N_EDITOR_BASE_URL=https://" + link +
+    " -e GENERIC_TIMEZONE=Asia/Kolkata -v n8n_data:/home/node/.n8n --restart unless-stopped docker.n8n.io/n8nio/n8n";
 
     document.getElementById("output").value = command;
-  }
+  });
 
-  function copyText() {
-    const output = document.getElementById("output");
-    output.select();
-    document.execCommand("copy");
+  document.getElementById("copyBtn").addEventListener("click", function () {
+    let text = document.getElementById("output").value;
+
+    if (!text) {
+      alert("Nothing to copy");
+      return;
+    }
+
+    navigator.clipboard.writeText(text);
     alert("Copied!");
-  }
+  });
 </script>
 
 </body>
