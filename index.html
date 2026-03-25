@@ -1,58 +1,174 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>Cloudflare Link Tool</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Cloudflare Link Tool</title>
+
+<style>
+  * {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Segoe UI', sans-serif;
+  }
+
+  body {
+    height: 100vh;
+    background: linear-gradient(135deg, #0f172a, #1e293b);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: white;
+  }
+
+  .card {
+    width: 90%;
+    max-width: 650px;
+    background: rgba(255,255,255,0.05);
+    backdrop-filter: blur(12px);
+    border-radius: 16px;
+    padding: 25px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+    border: 1px solid rgba(255,255,255,0.1);
+  }
+
+  h2 {
+    text-align: center;
+    margin-bottom: 20px;
+    font-weight: 900;
+    font-size: 24px;
+    color: Black;
+  }
+
+  input {
+    width: 100%;
+    padding: 12px;
+    border-radius: 10px;
+    border: none;
+    outline: none;
+    margin-bottom: 15px;
+    font-size: 14px;
+    background: rgba(255,255,255,0.08);
+    color: Black;
+  }
+
+  input::placeholder {
+    color: #383838;
+  }
+
+  textarea {
+    width: 100%;
+    height: 140px;
+    padding: 12px;
+    border-radius: 10px;
+    border: none;
+    margin-top: 15px;
+    font-size: 15px;
+    background: rgba(255,255,255,0.08);
+    color: Black;
+    resize: none;
+  }
+
+  .btn {
+    width: 100%;
+    padding: 12px;
+    border-radius: 10px;
+    border: none;
+    font-weight: bold;
+    cursor: pointer;
+    margin-top: 10px;
+    transition: 0.3s ease;
+  }
+
+  .generate {
+    background: linear-gradient(135deg, #22c55e, #16a34a);
+    color: black;
+  }
+
+  .generate:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(34,197,94,0.4);
+    color: white;
+  }
+
+  .copy {
+    background: linear-gradient(135deg, #38bdf8, #0ea5e9);
+    color: black;
+  }
+
+  .copy:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(56,189,248,0.4);
+    color: white;
+  }
+
+  .footer {
+    text-align: center;
+    font-size: 12px;
+    margin-top: 10px;
+    color: #aaa;
+  }
+</style>
 </head>
 
-<body style="font-family: Arial; padding:20px; background:#111; color:white;">
+<body>
 
-<h2>Cloudflare Link Replacer</h2>
+<div class="card">
+  <h2>🚀 Cloudflare Link Replacer</h2>
 
-<input id="linkInput" placeholder="Paste link here"
-style="width:100%; padding:10px; margin-bottom:10px;" />
+  <input id="linkInput" placeholder="Paste Cloudflare link..." />
 
-<button id="generateBtn">Generate Command</button>
+  <button class="btn generate" id="generateBtn">Generate Command</button>
 
-<br><br>
+  <textarea id="output" placeholder="Your command will appear here..."></textarea>
 
-<textarea id="output" style="width:100%; height:120px;"></textarea>
+  <button class="btn copy" id="copyBtn">Copy to Clipboard</button>
 
-<br><br>
-
-<button id="copyBtn">Copy</button>
+  <div class="footer">Made for quick Docker restarts ⚡</div>
+</div>
 
 <script>
+  const input = document.getElementById("linkInput");
+  const output = document.getElementById("output");
+
+  // Load saved link
+  window.onload = function () {
+    const saved = localStorage.getItem("cf_link");
+    if (saved) input.value = saved;
+  };
+
   document.getElementById("generateBtn").addEventListener("click", function () {
 
-    let link = document.getElementById("linkInput").value;
+    let link = input.value;
 
     if (!link) {
       alert("Enter link first");
       return;
     }
 
-    // Clean link
     link = link.replace("https://", "").replace("http://", "").trim();
+
+    localStorage.setItem("cf_link", link);
 
     let command = "docker stop n8n && docker rm n8n && docker run -d --name n8n -p 5678:5678 -e N8N_HOST=" + link +
     " -e N8N_PROTOCOL=https -e WEBHOOK_URL=https://" + link +
     " -e N8N_EDITOR_BASE_URL=https://" + link +
     " -e GENERIC_TIMEZONE=Asia/Kolkata -v n8n_data:/home/node/.n8n --restart unless-stopped docker.n8n.io/n8nio/n8n";
 
-    document.getElementById("output").value = command;
+    output.value = command;
   });
 
   document.getElementById("copyBtn").addEventListener("click", function () {
-    let text = document.getElementById("output").value;
-
-    if (!text) {
+    if (!output.value) {
       alert("Nothing to copy");
       return;
     }
 
-    navigator.clipboard.writeText(text);
-    alert("Copied!");
+    navigator.clipboard.writeText(output.value);
+
+    this.innerText = "Copied ✅";
+    setTimeout(() => this.innerText = "Copy to Clipboard", 1500);
   });
 </script>
 
